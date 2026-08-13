@@ -41,7 +41,7 @@ export const PERSONAS: Persona[] = [
 export const DEFAULT_PERSONA: PersonaId = "warm";
 
 export function personaById(id: string | undefined): Persona {
-  return PERSONAS.find((p) => p.id === id) ?? PERSONAS[0];
+  return PERSONAS.find((p) => p.id === id) ?? PERSONAS[0]!;
 }
 
 export function systemPrompt(id: string | undefined): string {
