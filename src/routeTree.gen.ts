@@ -10,43 +10,362 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AnalysisRouteImport } from './routes/analysis'
+import { Route as BackupRouteImport } from './routes/backup'
+import { Route as BriefingRouteImport } from './routes/briefing'
+import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as CompletedRouteImport } from './routes/completed'
+import { Route as ExecutiveRouteImport } from './routes/executive'
+import { Route as FocusHistoryRouteImport } from './routes/focus-history'
+import { Route as HabitsRouteImport } from './routes/habits'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as MonthlyReviewRouteImport } from './routes/monthly-review'
+import { Route as NightSummaryRouteImport } from './routes/night-summary'
+import { Route as PendingRouteImport } from './routes/pending'
+import { Route as PlacesRouteImport } from './routes/places'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StatsRouteImport } from './routes/stats'
+import { Route as TodayRouteImport } from './routes/today'
+import { Route as TomorrowRouteImport } from './routes/tomorrow'
+import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as WashroomRouteImport } from './routes/washroom'
+import { Route as WaterRouteImport } from './routes/water'
+import { Route as WeeklyReviewRouteImport } from './routes/weekly-review'
+import { Route as ManagerIndexRouteImport } from './routes/manager/index'
+import { Route as ManagerThreadIdRouteImport } from './routes/manager/$threadId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
+const AnalysisRoute = AnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BriefingRoute = BriefingRouteImport.update({
+  id: '/briefing',
+  path: '/briefing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompletedRoute = CompletedRouteImport.update({
+  id: '/completed',
+  path: '/completed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExecutiveRoute = ExecutiveRouteImport.update({
+  id: '/executive',
+  path: '/executive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FocusHistoryRoute = FocusHistoryRouteImport.update({
+  id: '/focus-history',
+  path: '/focus-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HabitsRoute = HabitsRouteImport.update({
+  id: '/habits',
+  path: '/habits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MonthlyReviewRoute = MonthlyReviewRouteImport.update({
+  id: '/monthly-review',
+  path: '/monthly-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NightSummaryRoute = NightSummaryRouteImport.update({
+  id: '/night-summary',
+  path: '/night-summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendingRoute = PendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlacesRoute = PlacesRouteImport.update({
+  id: '/places',
+  path: '/places',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatsRoute = StatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TodayRoute = TodayRouteImport.update({
+  id: '/today',
+  path: '/today',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TomorrowRoute = TomorrowRouteImport.update({
+  id: '/tomorrow',
+  path: '/tomorrow',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VoiceRoute = VoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WashroomRoute = WashroomRouteImport.update({
+  id: '/washroom',
+  path: '/washroom',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WaterRoute = WaterRouteImport.update({
+  id: '/water',
+  path: '/water',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeeklyReviewRoute = WeeklyReviewRouteImport.update({
+  id: '/weekly-review',
+  path: '/weekly-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerIndexRoute = ManagerIndexRouteImport.update({
+  id: '/manager/',
+  path: '/manager/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerThreadIdRoute = ManagerThreadIdRouteImport.update({
+  id: '/manager/$threadId',
+  path: '/manager/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/chat': typeof ApiChatRoute
+  '/analysis': typeof AnalysisRoute
+  '/backup': typeof BackupRoute
+  '/briefing': typeof BriefingRoute
+  '/calendar': typeof CalendarRoute
+  '/completed': typeof CompletedRoute
+  '/executive': typeof ExecutiveRoute
+  '/focus-history': typeof FocusHistoryRoute
+  '/habits': typeof HabitsRoute
+  '/history': typeof HistoryRoute
+  '/monthly-review': typeof MonthlyReviewRoute
+  '/night-summary': typeof NightSummaryRoute
+  '/pending': typeof PendingRoute
+  '/places': typeof PlacesRoute
+  '/report': typeof ReportRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/stats': typeof StatsRoute
+  '/today': typeof TodayRoute
+  '/tomorrow': typeof TomorrowRoute
+  '/voice': typeof VoiceRoute
+  '/washroom': typeof WashroomRoute
+  '/water': typeof WaterRoute
+  '/weekly-review': typeof WeeklyReviewRoute
+  '/manager/$threadId': typeof ManagerThreadIdRoute
+  '/manager/': typeof ManagerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/chat': typeof ApiChatRoute
+  '/analysis': typeof AnalysisRoute
+  '/backup': typeof BackupRoute
+  '/briefing': typeof BriefingRoute
+  '/calendar': typeof CalendarRoute
+  '/completed': typeof CompletedRoute
+  '/executive': typeof ExecutiveRoute
+  '/focus-history': typeof FocusHistoryRoute
+  '/habits': typeof HabitsRoute
+  '/history': typeof HistoryRoute
+  '/monthly-review': typeof MonthlyReviewRoute
+  '/night-summary': typeof NightSummaryRoute
+  '/pending': typeof PendingRoute
+  '/places': typeof PlacesRoute
+  '/report': typeof ReportRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/stats': typeof StatsRoute
+  '/today': typeof TodayRoute
+  '/tomorrow': typeof TomorrowRoute
+  '/voice': typeof VoiceRoute
+  '/washroom': typeof WashroomRoute
+  '/water': typeof WaterRoute
+  '/weekly-review': typeof WeeklyReviewRoute
+  '/manager/$threadId': typeof ManagerThreadIdRoute
+  '/manager': typeof ManagerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/chat': typeof ApiChatRoute
+  '/analysis': typeof AnalysisRoute
+  '/backup': typeof BackupRoute
+  '/briefing': typeof BriefingRoute
+  '/calendar': typeof CalendarRoute
+  '/completed': typeof CompletedRoute
+  '/executive': typeof ExecutiveRoute
+  '/focus-history': typeof FocusHistoryRoute
+  '/habits': typeof HabitsRoute
+  '/history': typeof HistoryRoute
+  '/monthly-review': typeof MonthlyReviewRoute
+  '/night-summary': typeof NightSummaryRoute
+  '/pending': typeof PendingRoute
+  '/places': typeof PlacesRoute
+  '/report': typeof ReportRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
+  '/stats': typeof StatsRoute
+  '/today': typeof TodayRoute
+  '/tomorrow': typeof TomorrowRoute
+  '/voice': typeof VoiceRoute
+  '/washroom': typeof WashroomRoute
+  '/water': typeof WaterRoute
+  '/weekly-review': typeof WeeklyReviewRoute
+  '/manager/$threadId': typeof ManagerThreadIdRoute
+  '/manager/': typeof ManagerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/analysis'
+    | '/backup'
+    | '/briefing'
+    | '/calendar'
+    | '/completed'
+    | '/executive'
+    | '/focus-history'
+    | '/habits'
+    | '/history'
+    | '/monthly-review'
+    | '/night-summary'
+    | '/pending'
+    | '/places'
+    | '/report'
+    | '/search'
+    | '/settings'
+    | '/stats'
+    | '/today'
+    | '/tomorrow'
+    | '/voice'
+    | '/washroom'
+    | '/water'
+    | '/weekly-review'
+    | '/manager/$threadId'
+    | '/manager/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat'
-  id: '__root__' | '/' | '/api/chat'
+  to:
+    | '/'
+    | '/analysis'
+    | '/backup'
+    | '/briefing'
+    | '/calendar'
+    | '/completed'
+    | '/executive'
+    | '/focus-history'
+    | '/habits'
+    | '/history'
+    | '/monthly-review'
+    | '/night-summary'
+    | '/pending'
+    | '/places'
+    | '/report'
+    | '/search'
+    | '/settings'
+    | '/stats'
+    | '/today'
+    | '/tomorrow'
+    | '/voice'
+    | '/washroom'
+    | '/water'
+    | '/weekly-review'
+    | '/manager/$threadId'
+    | '/manager'
+  id:
+    | '__root__'
+    | '/'
+    | '/analysis'
+    | '/backup'
+    | '/briefing'
+    | '/calendar'
+    | '/completed'
+    | '/executive'
+    | '/focus-history'
+    | '/habits'
+    | '/history'
+    | '/monthly-review'
+    | '/night-summary'
+    | '/pending'
+    | '/places'
+    | '/report'
+    | '/search'
+    | '/settings'
+    | '/stats'
+    | '/today'
+    | '/tomorrow'
+    | '/voice'
+    | '/washroom'
+    | '/water'
+    | '/weekly-review'
+    | '/manager/$threadId'
+    | '/manager/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiChatRoute: typeof ApiChatRoute
+  AnalysisRoute: typeof AnalysisRoute
+  BackupRoute: typeof BackupRoute
+  BriefingRoute: typeof BriefingRoute
+  CalendarRoute: typeof CalendarRoute
+  CompletedRoute: typeof CompletedRoute
+  ExecutiveRoute: typeof ExecutiveRoute
+  FocusHistoryRoute: typeof FocusHistoryRoute
+  HabitsRoute: typeof HabitsRoute
+  HistoryRoute: typeof HistoryRoute
+  MonthlyReviewRoute: typeof MonthlyReviewRoute
+  NightSummaryRoute: typeof NightSummaryRoute
+  PendingRoute: typeof PendingRoute
+  PlacesRoute: typeof PlacesRoute
+  ReportRoute: typeof ReportRoute
+  SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
+  StatsRoute: typeof StatsRoute
+  TodayRoute: typeof TodayRoute
+  TomorrowRoute: typeof TomorrowRoute
+  VoiceRoute: typeof VoiceRoute
+  WashroomRoute: typeof WashroomRoute
+  WaterRoute: typeof WaterRoute
+  WeeklyReviewRoute: typeof WeeklyReviewRoute
+  ManagerThreadIdRoute: typeof ManagerThreadIdRoute
+  ManagerIndexRoute: typeof ManagerIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,11 +377,179 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
+    '/analysis': {
+      id: '/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/briefing': {
+      id: '/briefing'
+      path: '/briefing'
+      fullPath: '/briefing'
+      preLoaderRoute: typeof BriefingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/completed': {
+      id: '/completed'
+      path: '/completed'
+      fullPath: '/completed'
+      preLoaderRoute: typeof CompletedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/executive': {
+      id: '/executive'
+      path: '/executive'
+      fullPath: '/executive'
+      preLoaderRoute: typeof ExecutiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/focus-history': {
+      id: '/focus-history'
+      path: '/focus-history'
+      fullPath: '/focus-history'
+      preLoaderRoute: typeof FocusHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/habits': {
+      id: '/habits'
+      path: '/habits'
+      fullPath: '/habits'
+      preLoaderRoute: typeof HabitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/monthly-review': {
+      id: '/monthly-review'
+      path: '/monthly-review'
+      fullPath: '/monthly-review'
+      preLoaderRoute: typeof MonthlyReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/night-summary': {
+      id: '/night-summary'
+      path: '/night-summary'
+      fullPath: '/night-summary'
+      preLoaderRoute: typeof NightSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pending': {
+      id: '/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof PendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/places': {
+      id: '/places'
+      path: '/places'
+      fullPath: '/places'
+      preLoaderRoute: typeof PlacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/today': {
+      id: '/today'
+      path: '/today'
+      fullPath: '/today'
+      preLoaderRoute: typeof TodayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tomorrow': {
+      id: '/tomorrow'
+      path: '/tomorrow'
+      fullPath: '/tomorrow'
+      preLoaderRoute: typeof TomorrowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voice': {
+      id: '/voice'
+      path: '/voice'
+      fullPath: '/voice'
+      preLoaderRoute: typeof VoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/washroom': {
+      id: '/washroom'
+      path: '/washroom'
+      fullPath: '/washroom'
+      preLoaderRoute: typeof WashroomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/water': {
+      id: '/water'
+      path: '/water'
+      fullPath: '/water'
+      preLoaderRoute: typeof WaterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weekly-review': {
+      id: '/weekly-review'
+      path: '/weekly-review'
+      fullPath: '/weekly-review'
+      preLoaderRoute: typeof WeeklyReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager/': {
+      id: '/manager/'
+      path: '/manager'
+      fullPath: '/manager/'
+      preLoaderRoute: typeof ManagerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager/$threadId': {
+      id: '/manager/$threadId'
+      path: '/manager/$threadId'
+      fullPath: '/manager/$threadId'
+      preLoaderRoute: typeof ManagerThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -70,18 +557,32 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiChatRoute: ApiChatRoute,
+  AnalysisRoute: AnalysisRoute,
+  BackupRoute: BackupRoute,
+  BriefingRoute: BriefingRoute,
+  CalendarRoute: CalendarRoute,
+  CompletedRoute: CompletedRoute,
+  ExecutiveRoute: ExecutiveRoute,
+  FocusHistoryRoute: FocusHistoryRoute,
+  HabitsRoute: HabitsRoute,
+  HistoryRoute: HistoryRoute,
+  MonthlyReviewRoute: MonthlyReviewRoute,
+  NightSummaryRoute: NightSummaryRoute,
+  PendingRoute: PendingRoute,
+  PlacesRoute: PlacesRoute,
+  ReportRoute: ReportRoute,
+  SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
+  StatsRoute: StatsRoute,
+  TodayRoute: TodayRoute,
+  TomorrowRoute: TomorrowRoute,
+  VoiceRoute: VoiceRoute,
+  WashroomRoute: WashroomRoute,
+  WaterRoute: WaterRoute,
+  WeeklyReviewRoute: WeeklyReviewRoute,
+  ManagerThreadIdRoute: ManagerThreadIdRoute,
+  ManagerIndexRoute: ManagerIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
