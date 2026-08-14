@@ -173,6 +173,8 @@ export type PlanRecord = {
   approvedBy: "user";
   rejectedStyles: string[];
   blocks: { title: string; start: string; end: string; kind: string }[];
+};
+
 
 
 const STORAGE_KEY = "lumi.state.v1";
