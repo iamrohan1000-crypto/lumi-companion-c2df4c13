@@ -153,10 +153,29 @@ type LumiState = {
   focusSessions: FocusSession[];
   /** Phase 27 */
   recentSearches: string[];
+  /** Phase 35 — approved AI auto plans */
+  planHistory: PlanRecord[];
+  /** Phase 35 — things the user told the AI they don't like */
+  planDislikes: string[];
   /** yyyy-mm-dd of the last spoken morning briefing / night summary */
   lastBriefing?: string;
   lastNight?: string;
 };
+
+/** Phase 35 — an approved AI Auto Plan, kept in history. */
+export type PlanRecord = {
+  id: string;
+  date: string;
+  style: string;
+  name: string;
+  reason: string;
+  approvedAt: string;
+  approvedBy: "user";
+  rejectedStyles: string[];
+  blocks: { title: string; start: string; end: string; kind: string }[];
+};
+
+
 
 const STORAGE_KEY = "lumi.state.v1";
 
@@ -220,6 +239,8 @@ const EMPTY: LumiState = {
   places: DEFAULT_PLACES,
   focusSessions: [],
   recentSearches: [],
+  planHistory: [],
+  planDislikes: [],
 };
 
 
@@ -291,6 +312,8 @@ function hydrate() {
         places: Array.isArray(parsed.places) ? parsed.places : DEFAULT_PLACES,
         focusSessions: Array.isArray(parsed.focusSessions) ? parsed.focusSessions : [],
         recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
+        planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
+        planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
         lastBriefing: parsed.lastBriefing,
         lastNight: parsed.lastNight,
       };
@@ -721,6 +744,8 @@ export function useLumi() {
     places: snapshot.places,
     focusSessions: snapshot.focusSessions,
     recentSearches: snapshot.recentSearches,
+    planHistory: snapshot.planHistory,
+    planDislikes: snapshot.planDislikes,
     lastBriefing: snapshot.lastBriefing,
     lastNight: snapshot.lastNight,
     addPlace,
@@ -755,6 +780,44 @@ export function useLumi() {
   };
 }
 
+
+/* ---------- Phase 35: AI Auto Plan ---------- */
+
+/** Adds several tasks in one commit and returns them. */
+export function addTasksBulk(inputs: TaskInput[]): Task[] {
+  const now = new Date().toISOString();
+  const created: Task[] = inputs.map((input) => ({
+    ...input,
+    id: crypto.randomUUID(),
+    status: "pending" as TaskStatus,
+    completed: false,
+    postponedCount: 0,
+    createdAt: now,
+  }));
+  setState({ ...state, tasks: [...state.tasks, ...created] });
+  return created;
+}
+
+/** Removes pending tasks for a date — used when an approved plan takes over the day. */
+export function clearPendingOn(date: string) {
+  setState({
+    ...state,
+    tasks: state.tasks.filter((t) => !(t.date === date && t.status === "pending")),
+  });
+}
+
+export function saveApprovedPlan(record: PlanRecord) {
+  setState({ ...state, planHistory: [record, ...state.planHistory].slice(0, 100) });
+}
+
+export function rememberPlanDislike(text: string) {
+  const value = text.trim();
+  if (!value) return;
+  setState({
+    ...state,
+    planDislikes: [value, ...state.planDislikes.filter((d) => d !== value)].slice(0, 20),
+  });
+}
 
 /** read-only access outside React (reminder engine) */
 export function getLumiState() {

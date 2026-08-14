@@ -69,6 +69,29 @@ export function onVoicesReady(cb: () => void) {
   return () => window.speechSynthesis.removeEventListener("voiceschanged", handler);
 }
 
+/** Voices that sound like a bright young woman — preferred for Lumi. */
+const YOUNG_FEMALE_HINTS = [
+  "zira",
+  "ava",
+  "samantha",
+  "aria",
+  "jenny",
+  "sonia",
+  "libby",
+  "natasha",
+  "clara",
+  "michelle",
+  "google uk english female",
+  "google us english",
+  "female",
+];
+
+function youngScore(name: string) {
+  const n = name.toLowerCase();
+  const i = YOUNG_FEMALE_HINTS.findIndex((h) => n.includes(h));
+  return i === -1 ? YOUNG_FEMALE_HINTS.length : i;
+}
+
 function pickVoice() {
   const { settings } = getLumiState();
   const voices = window.speechSynthesis.getVoices();
@@ -77,13 +100,18 @@ function pickVoice() {
     const exact = voices.find((v) => v.voiceURI === settings.voiceURI);
     if (exact) return exact;
   }
-  const byGender = voices.find(
-    (v) =>
-      guessGender(v.name) === settings.voiceGender &&
-      (v.lang.toLowerCase().startsWith("en") || v.default),
-  );
-  return byGender ?? voices.find((v) => v.lang.toLowerCase().startsWith("en")) ?? voices[0];
+  const english = voices.filter((v) => v.lang.toLowerCase().startsWith("en") || v.default);
+  if (settings.voiceGender === "female") {
+    // youngest-sounding female English voice first
+    const ranked = english
+      .filter((v) => guessGender(v.name) !== "male")
+      .sort((a, b) => youngScore(a.name) - youngScore(b.name));
+    if (ranked[0]) return ranked[0];
+  }
+  const byGender = english.find((v) => guessGender(v.name) === settings.voiceGender);
+  return byGender ?? english[0] ?? voices[0];
 }
+
 
 export function stopSpeaking() {
   if (speechSupported()) window.speechSynthesis.cancel();
