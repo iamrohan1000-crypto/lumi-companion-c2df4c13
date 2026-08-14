@@ -153,10 +153,27 @@ type LumiState = {
   focusSessions: FocusSession[];
   /** Phase 27 */
   recentSearches: string[];
+  /** Phase 35 — approved AI auto plans */
+  planHistory: PlanRecord[];
+  /** Phase 35 — things the user told the AI they don't like */
+  planDislikes: string[];
   /** yyyy-mm-dd of the last spoken morning briefing / night summary */
   lastBriefing?: string;
   lastNight?: string;
 };
+
+/** Phase 35 — an approved AI Auto Plan, kept in history. */
+export type PlanRecord = {
+  id: string;
+  date: string;
+  style: string;
+  name: string;
+  reason: string;
+  approvedAt: string;
+  approvedBy: "user";
+  rejectedStyles: string[];
+  blocks: { title: string; start: string; end: string; kind: string }[];
+
 
 const STORAGE_KEY = "lumi.state.v1";
 
