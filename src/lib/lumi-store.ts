@@ -312,8 +312,6 @@ function hydrate() {
         places: Array.isArray(parsed.places) ? parsed.places : DEFAULT_PLACES,
         focusSessions: Array.isArray(parsed.focusSessions) ? parsed.focusSessions : [],
         recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
-      planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
-      planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
         planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
         planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
         lastBriefing: parsed.lastBriefing,
