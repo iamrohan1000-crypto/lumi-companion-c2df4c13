@@ -1,14 +1,13 @@
-# Lumi Companion
+# Lumi: Your AI Companion
 
-[https://github.com/iamrohan1000-crypto/lumi-your-ai-companion](https://github.com/iamrohan1000-crypto/lumi-your-ai-companion)
-
-Import and continue building this app
+i want to build an Ai assisstent app . i will provide you its phases . 
+App name : Lumi . app logo is provided you .
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/8642a8bb-a055-4c14-af86-75ce2951f22f).
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/715a508a-7784-403e-b316-b8d018757318).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
 - **Stay in sync**: every change made in Lovable is committed straight to this repository.

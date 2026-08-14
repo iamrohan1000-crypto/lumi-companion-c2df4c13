@@ -10,6 +10,13 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { Toaster } from "../components/ui/sonner";
+import { ReminderEngine } from "../components/lumi/reminder-engine";
+import { TenMinuteWarning } from "../components/lumi/ten-minute-warning";
+import { DailyAgent } from "../components/lumi/daily-agent";
+import { FocusMode } from "../components/lumi/focus-mode";
+import { LocationWatcher } from "../components/lumi/location-watcher";
+import { AutoBackup } from "../components/lumi/auto-backup";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -77,11 +84,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumi — Your AI Companion" },
-      { name: "description", content: "A warm AI companion that listens, any hour." },
-      { name: "author", content: "Lumi" },
-      { property: "og:title", content: "Lumi — Your AI Companion" },
-      { property: "og:description", content: "A warm AI companion that listens, any hour." },
+      { title: "Lumi — Your AI. Your Day. Your Way." },
+      {
+        name: "description",
+        content:
+          "Lumi is your personal executive assistant for daily routines, tasks and discipline.",
+      },
+      { name: "theme-color", content: "#0b1020" },
+      { property: "og:title", content: "Lumi — Your AI. Your Day. Your Way." },
+      {
+        property: "og:description",
+        content: "Plan your routine, track tasks and build discipline with Lumi.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -94,11 +108,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -107,7 +122,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -126,6 +141,13 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <ReminderEngine />
+      <TenMinuteWarning />
+      <DailyAgent />
+      <FocusMode />
+      <LocationWatcher />
+      <AutoBackup />
+      <Toaster position="top-center" richColors />
     </QueryClientProvider>
   );
 }
