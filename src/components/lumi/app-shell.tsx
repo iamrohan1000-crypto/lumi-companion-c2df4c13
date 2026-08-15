@@ -22,6 +22,7 @@ import {
   Focus,
   Brain,
   MessageSquare,
+  Wand2,
   CalendarRange,
   LineChart,
   LayoutPanelTop,
