@@ -36,6 +36,8 @@ export const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/executive", label: "Executive", icon: LayoutPanelTop },
   { to: "/manager", label: "AI Manager", icon: MessageSquare },
+  { to: "/autoplan", label: "AI Auto Plan", icon: Wand2 },
+
   { to: "/briefing", label: "Morning Briefing", icon: Sunrise },
   { to: "/today", label: "Today", icon: Sunrise },
   { to: "/tomorrow", label: "Tomorrow", icon: CalendarClock },
