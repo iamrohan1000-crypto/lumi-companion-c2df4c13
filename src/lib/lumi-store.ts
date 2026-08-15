@@ -190,8 +190,10 @@ export const DEFAULT_SETTINGS: LumiSettings = {
   waterGoal: 8,
   voiceEnabled: true,
   voiceGender: "female",
-  voiceRate: 1,
-  voicePitch: 1,
+  voiceRate: 1.05,
+  // brighter, younger-sounding female voice by default
+  voicePitch: 1.35,
+
   voiceVolume: 1,
   briefingEnabled: true,
   briefingTime: "07:00",
