@@ -190,8 +190,10 @@ export const DEFAULT_SETTINGS: LumiSettings = {
   waterGoal: 8,
   voiceEnabled: true,
   voiceGender: "female",
-  voiceRate: 1,
-  voicePitch: 1,
+  voiceRate: 1.05,
+  // brighter, younger-sounding female voice by default
+  voicePitch: 1.35,
+
   voiceVolume: 1,
   briefingEnabled: true,
   briefingTime: "07:00",
@@ -1518,6 +1520,9 @@ export function restoreLumiBackup(raw: unknown): { ok: boolean; error?: string }
       habitLog: parsed.habitLog ?? {},
       places: Array.isArray(parsed.places) ? parsed.places : [],
       focusSessions: Array.isArray(parsed.focusSessions) ? parsed.focusSessions : [],
+      planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
+      planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
+
       recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
       lastBriefing: parsed.lastBriefing,
       lastNight: parsed.lastNight,

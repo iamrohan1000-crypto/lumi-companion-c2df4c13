@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalysisRouteImport } from './routes/analysis'
+import { Route as AutoplanRouteImport } from './routes/autoplan'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as BriefingRouteImport } from './routes/briefing'
 import { Route as CalendarRouteImport } from './routes/calendar'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const AnalysisRoute = AnalysisRouteImport.update({
   id: '/analysis',
   path: '/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutoplanRoute = AutoplanRouteImport.update({
+  id: '/autoplan',
+  path: '/autoplan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BackupRoute = BackupRouteImport.update({
@@ -170,6 +176,7 @@ const ManagerThreadIdRoute = ManagerThreadIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/autoplan': typeof AutoplanRoute
   '/backup': typeof BackupRoute
   '/briefing': typeof BriefingRoute
   '/calendar': typeof CalendarRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/autoplan': typeof AutoplanRoute
   '/backup': typeof BackupRoute
   '/briefing': typeof BriefingRoute
   '/calendar': typeof CalendarRoute
@@ -227,6 +235,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRoute
+  '/autoplan': typeof AutoplanRoute
   '/backup': typeof BackupRoute
   '/briefing': typeof BriefingRoute
   '/calendar': typeof CalendarRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analysis'
+    | '/autoplan'
     | '/backup'
     | '/briefing'
     | '/calendar'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analysis'
+    | '/autoplan'
     | '/backup'
     | '/briefing'
     | '/calendar'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analysis'
+    | '/autoplan'
     | '/backup'
     | '/briefing'
     | '/calendar'
@@ -342,6 +354,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalysisRoute: typeof AnalysisRoute
+  AutoplanRoute: typeof AutoplanRoute
   BackupRoute: typeof BackupRoute
   BriefingRoute: typeof BriefingRoute
   CalendarRoute: typeof CalendarRoute
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/analysis'
       fullPath: '/analysis'
       preLoaderRoute: typeof AnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/autoplan': {
+      id: '/autoplan'
+      path: '/autoplan'
+      fullPath: '/autoplan'
+      preLoaderRoute: typeof AutoplanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/backup': {
@@ -558,6 +578,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalysisRoute: AnalysisRoute,
+  AutoplanRoute: AutoplanRoute,
   BackupRoute: BackupRoute,
   BriefingRoute: BriefingRoute,
   CalendarRoute: CalendarRoute,
