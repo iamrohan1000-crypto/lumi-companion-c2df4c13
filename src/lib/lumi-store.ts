@@ -45,6 +45,12 @@ export type Task = {
   locationId?: string;
   /** Phase 23 — also remind about it when leaving the place */
   remindOnLeave?: boolean;
+  /** minutes before `time` the reminder should fire (overrides the setting) */
+  reminderLead?: number;
+  /** Phase 40/41 — the AI plan this task came from */
+  planId?: string;
+  /** Phase 41 — HH:mm the AI plan originally scheduled it at */
+  plannedTime?: string;
   createdAt: string;
 };
 
