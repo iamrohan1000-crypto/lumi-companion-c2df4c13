@@ -612,6 +612,9 @@ function buildOnePlan(cfg: StyleConfig, input: PlanInput, effects: DislikeEffect
     blocks: out,
     unscheduled,
     reason,
+    shortReason: buildShortReason(cfg, input, effects, breakMinutes),
+    dayStart: cfg.dayStart,
+    dayEnd: cfg.dayEnd,
     stats: {
       tasks: taskBlocks.length,
       workMinutes,
