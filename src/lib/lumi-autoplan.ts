@@ -109,6 +109,14 @@ export type Behaviour = {
   completionRate: number;
   /** how often tasks get postponed */
   postponeRate: number;
+  /** Phase 41 — average minutes late finishing an AI-planned task */
+  avgDrift: number;
+  /** Phase 41 — % of AI-planned tasks finished on time */
+  onTimeRate: number;
+  /** Phase 41 — how many AI-planned tasks have been observed */
+  observed: number;
+  /** hour bucket (0-23) where the user completes most Study work */
+  bestStudyHour?: number;
 };
 
 export function learnFromHistory(tasks: Task[]): Behaviour {
@@ -123,6 +131,28 @@ export function learnFromHistory(tasks: Task[]): Behaviour {
     ? Math.round(completed.reduce((s, t) => s + (t.duration || 30), 0) / completed.length)
     : 45;
 
+  // Phase 41 — learn from how the user actually followed previous AI plans.
+  const planned = tasks.filter((t) => t.planId && t.plannedTime);
+  const finished = planned.filter((t) => t.status === "completed" && t.completedAt);
+  const drifts = finished.map((t) => {
+    const d = new Date(t.completedAt!);
+    const actual = d.getHours() * 60 + d.getMinutes();
+    return actual - (minutesOf(t.plannedTime!) + (t.duration || 0));
+  });
+  const avgDrift = drifts.length
+    ? Math.round(drifts.reduce((a, b) => a + b, 0) / drifts.length)
+    : 0;
+  const onTimeRate = planned.length
+    ? Math.round((drifts.filter((d) => d <= 15).length / planned.length) * 100)
+    : 0;
+
+  const studyHours = completed
+    .filter((t) => /study|read|revision|acca/i.test(`${t.category} ${t.title}`))
+    .map((t) => Math.floor(minutesOf(t.time!) / 60));
+  const counts = new Map<number, number>();
+  studyHours.forEach((h) => counts.set(h, (counts.get(h) ?? 0) + 1));
+  const bestStudyHour = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+
   return {
     earliestStart,
     peakStart,
@@ -131,6 +161,10 @@ export function learnFromHistory(tasks: Task[]): Behaviour {
       ? Math.round((all.filter((t) => t.status === "completed").length / all.length) * 100)
       : 60,
     postponeRate: tasks.length ? Math.round((postponed / tasks.length) * 100) : 0,
+    avgDrift,
+    onTimeRate,
+    observed: planned.length,
+    bestStudyHour,
   };
 }
 
@@ -153,6 +187,8 @@ export type PlanBlock = {
   /** existing task this block reschedules */
   taskId?: string;
   note?: string;
+  /** minutes before start that this item's reminder fires */
+  reminderLead?: number;
 };
 
 export type Plan = {
@@ -164,6 +200,10 @@ export type Plan = {
   blocks: PlanBlock[];
   unscheduled: string[];
   reason: string;
+  /** Phase 39 — a short, human explanation */
+  shortReason: string;
+  dayStart: number;
+  dayEnd: number;
   stats: { tasks: number; workMinutes: number; breakMinutes: number; fixed: number; waters: number };
 };
 
@@ -572,6 +612,9 @@ function buildOnePlan(cfg: StyleConfig, input: PlanInput, effects: DislikeEffect
     blocks: out,
     unscheduled,
     reason,
+    shortReason: buildShortReason(cfg, input, effects, breakMinutes),
+    dayStart: cfg.dayStart,
+    dayEnd: cfg.dayEnd,
     stats: {
       tasks: taskBlocks.length,
       workMinutes,
@@ -627,4 +670,213 @@ export function buildPlans(input: PlanInput): Plan[] {
 
 export function prettyStyle(style: PlanStyle) {
   return style === "productive" ? "Highly Productive" : style === "balanced" ? "Balanced" : "Relaxed";
+}
+
+/* ---------- Phase 39: short explanations ---------- */
+
+function buildShortReason(
+  cfg: StyleConfig,
+  input: PlanInput,
+  effects: DislikeEffect,
+  breakMinutes: number,
+): string {
+  const b = input.behaviour;
+  if (cfg.style === "productive") {
+    if (b.bestStudyHour !== undefined && b.bestStudyHour >= 16)
+      return `You finish focus work best around ${timeOf(b.bestStudyHour * 60)}, so I put your heaviest session in that window and cleared the rest of the day for it.`;
+    return `You complete about ${b.completionRate}% of what you plan, so I front-loaded your hardest work from ${timeOf(cfg.dayStart)} while your focus is highest.`;
+  }
+  if (cfg.style === "balanced") {
+    if (b.postponeRate > 20)
+      return `I added ${breakMinutes} minutes of breaks because your history shows you delay tasks when several are scheduled back to back.`;
+    return `I kept an even rhythm of ${cfg.focusRun}-minute sessions with ${cfg.breakLen}-minute breaks, close to your usual ${b.avgSession}-minute working stretch.`;
+  }
+  if (effects.lateStart)
+    return `You told me you don't like early mornings, so the day opens at ${timeOf(cfg.dayStart)} and I left big free blocks for anything unexpected.`;
+  return `I left larger free-time blocks so unexpected work can be added, and kept sessions short at ${cfg.focusRun} minutes.`;
+}
+
+/* ---------- Phase 38: conflict & capacity check ---------- */
+
+export type Bucket = { title: string; duration: number; why: string };
+
+export type Feasibility = {
+  overloaded: boolean;
+  headline: string;
+  /** minutes */
+  needed: number;
+  available: number;
+  conflicts: string[];
+  mustDo: Bucket[];
+  shouldDo: Bucket[];
+  canPostpone: Bucket[];
+};
+
+export function analyzeFeasibility(input: PlanInput): Feasibility {
+  const effects = readDislikes(input.dislikes);
+  const cfg = applyDislikes(baseConfigs(input.behaviour, input.round)[1]!, effects);
+  const conflicts: string[] = [];
+
+  type Candidate = {
+    title: string;
+    duration: number;
+    fixed: boolean;
+    time?: string;
+    important: boolean;
+    priority: Priority;
+    origin: "draft" | "pending" | "appointment";
+    location?: string;
+  };
+
+  const candidates: Candidate[] = [
+    ...input.appointments.map<Candidate>((t) => ({
+      title: t.title,
+      duration: t.duration || 30,
+      fixed: true,
+      time: t.time,
+      important: t.important,
+      priority: t.priority,
+      origin: "appointment",
+    })),
+    ...input.drafts.map<Candidate>((d) => ({
+      title: d.title,
+      duration: d.duration,
+      fixed: d.fixed,
+      time: d.time,
+      important: d.importance === "high",
+      priority: d.importance,
+      origin: "draft",
+      location: d.location,
+    })),
+    ...input.pending.map<Candidate>((t) => ({
+      title: t.title,
+      duration: t.duration || 30,
+      fixed: false,
+      important: t.important,
+      priority: t.priority,
+      origin: "pending",
+    })),
+  ];
+
+  // time collisions between fixed items
+  const timed = candidates.filter((c) => c.fixed && c.time).sort((a, b) => minutesOf(a.time!) - minutesOf(b.time!));
+  for (let i = 0; i < timed.length - 1; i++) {
+    const a = timed[i]!;
+    const b = timed[i + 1]!;
+    const aEnd = minutesOf(a.time!) + a.duration;
+    const gap = minutesOf(b.time!) - aEnd;
+    if (gap < 0) conflicts.push(`${a.title} and ${b.title} overlap at ${b.time}.`);
+    else if (gap < 15 && (a.location ?? "") !== (b.location ?? ""))
+      conflicts.push(`Only ${gap} minutes between ${a.title} and ${b.title} — that's not enough travel time.`);
+  }
+
+  for (const c of candidates) {
+    if (c.duration < 10) conflicts.push(`${c.title} has only ${c.duration} minutes — likely too short to finish.`);
+    if (c.fixed && c.time && minutesOf(c.time) + c.duration > 24 * 60)
+      conflicts.push(`${c.title} would run past midnight.`);
+  }
+
+  const needed = candidates.reduce((s, c) => s + c.duration, 0);
+  const breaksNeeded = Math.max(0, Math.floor(needed / cfg.focusRun)) * cfg.breakLen;
+  const available = cfg.dayEnd - cfg.dayStart;
+
+  if (candidates.length > 12) conflicts.push(`${candidates.length} items in one day is more than you usually finish.`);
+  if (breaksNeeded === 0 && needed > 240) conflicts.push("No breaks fit in this load — that's not sustainable.");
+
+  const overloaded = needed + breaksNeeded > available;
+
+  const sorted = [...candidates].sort(
+    (a, b) => Number(b.fixed) - Number(a.fixed) || Number(b.important) - Number(a.important) || rank[a.priority] - rank[b.priority],
+  );
+
+  const mustDo: Bucket[] = [];
+  const shouldDo: Bucket[] = [];
+  const canPostpone: Bucket[] = [];
+  let used = 0;
+  for (const c of sorted) {
+    const why = c.fixed
+      ? "Fixed appointment — cannot move"
+      : c.important
+        ? "You marked this important"
+        : c.origin === "pending"
+          ? "Carried over from an earlier day"
+          : c.priority === "high"
+            ? "High priority"
+            : c.priority === "low"
+              ? "Low priority"
+              : "Normal priority";
+    const bucket = { title: c.title, duration: c.duration, why };
+    if (c.fixed || c.important || c.priority === "high") {
+      mustDo.push(bucket);
+      used += c.duration;
+    } else if (used + c.duration + breaksNeeded <= available && c.priority !== "low") {
+      shouldDo.push(bucket);
+      used += c.duration;
+    } else {
+      canPostpone.push(bucket);
+    }
+  }
+
+  return {
+    overloaded,
+    headline: overloaded
+      ? "Sir, you have more work than available time."
+      : conflicts.length
+        ? "Sir, this day fits — but a few things clash."
+        : "Sir, everything fits comfortably.",
+    needed: needed + breaksNeeded,
+    available,
+    conflicts,
+    mustDo,
+    shouldDo,
+    canPostpone,
+  };
+}
+
+/* ---------- drag-and-drop fine tuning ---------- */
+
+/**
+ * Re-lays a plan after the user drags flexible blocks into a new order.
+ * Fixed blocks keep their exact times; everything else flows around them.
+ */
+export function resequencePlan(plan: Plan, orderedFlexibleIds: string[]): Plan {
+  const byId = new Map(plan.blocks.map((b) => [b.id, b]));
+  const fixed = plan.blocks.filter((b) => b.fixed).sort((a, b) => minutesOf(a.start) - minutesOf(b.start));
+  const flexible = orderedFlexibleIds.map((id) => byId.get(id)).filter((b): b is PlanBlock => Boolean(b) && !b!.fixed);
+
+  const out: PlanBlock[] = [...fixed];
+  let cursor = plan.dayStart;
+  const queue = [...fixed];
+
+  for (const b of flexible) {
+    while (queue[0] && cursor + b.duration > minutesOf(queue[0].start)) {
+      const f = queue.shift()!;
+      cursor = Math.max(cursor, minutesOf(f.end));
+    }
+    out.push({ ...b, start: timeOf(cursor), end: timeOf(cursor + b.duration) });
+    cursor += b.duration;
+  }
+
+  out.sort((a, b) => minutesOf(a.start) - minutesOf(b.start));
+  return { ...plan, blocks: out };
+}
+
+/** Changes one block's duration and re-lays the day. */
+export function setBlockDuration(plan: Plan, blockId: string, duration: number): Plan {
+  const next = {
+    ...plan,
+    blocks: plan.blocks.map((b) => (b.id === blockId ? { ...b, duration: Math.max(5, duration) } : b)),
+  };
+  return resequencePlan(
+    next,
+    next.blocks.filter((b) => !b.fixed).map((b) => b.id),
+  );
+}
+
+/** Sets the per-item reminder lead (minutes before start). */
+export function setBlockLead(plan: Plan, blockId: string, lead: number): Plan {
+  return {
+    ...plan,
+    blocks: plan.blocks.map((b) => (b.id === blockId ? { ...b, reminderLead: Math.max(0, lead) } : b)),
+  };
 }

@@ -45,6 +45,12 @@ export type Task = {
   locationId?: string;
   /** Phase 23 — also remind about it when leaving the place */
   remindOnLeave?: boolean;
+  /** minutes before `time` the reminder should fire (overrides the setting) */
+  reminderLead?: number;
+  /** Phase 40/41 — the AI plan this task came from */
+  planId?: string;
+  /** Phase 41 — HH:mm the AI plan originally scheduled it at */
+  plannedTime?: string;
   createdAt: string;
 };
 
@@ -103,6 +109,10 @@ export type LumiSettings = {
   autoSchedule: boolean;
   /** minutes added by the Snooze button */
   snoozeMinutes: number;
+  /** default minutes before a task starts that its reminder fires */
+  taskReminderLead: number;
+  /** default minutes before a water block that the water reminder fires */
+  waterReminderLead: number;
   /** glasses per day */
   waterGoal: number;
   /* Phase 18 — voice assistant */
@@ -157,6 +167,8 @@ type LumiState = {
   planHistory: PlanRecord[];
   /** Phase 35 — things the user told the AI they don't like */
   planDislikes: string[];
+  /** Phase 40 — the AI plan currently running as today's routine */
+  activePlan?: PlanRecord;
   /** yyyy-mm-dd of the last spoken morning briefing / night summary */
   lastBriefing?: string;
   lastNight?: string;
@@ -169,10 +181,20 @@ export type PlanRecord = {
   style: string;
   name: string;
   reason: string;
+  /** Phase 39 — one short sentence */
+  shortReason?: string;
   approvedAt: string;
   approvedBy: "user";
   rejectedStyles: string[];
-  blocks: { title: string; start: string; end: string; kind: string }[];
+  blocks: {
+    title: string;
+    start: string;
+    end: string;
+    kind: string;
+    duration?: number;
+    taskId?: string;
+    important?: boolean;
+  }[];
 };
 
 
@@ -187,6 +209,8 @@ export const DEFAULT_SETTINGS: LumiSettings = {
   categories: ["Routine", "Work", "Health", "Study", "Personal"],
   autoSchedule: true,
   snoozeMinutes: 10,
+  taskReminderLead: 0,
+  waterReminderLead: 0,
   waterGoal: 8,
   voiceEnabled: true,
   voiceGender: "female",
@@ -316,6 +340,7 @@ function hydrate() {
         recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
         planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
         planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
+        activePlan: parsed.activePlan,
         lastBriefing: parsed.lastBriefing,
         lastNight: parsed.lastNight,
       };
@@ -748,6 +773,7 @@ export function useLumi() {
     recentSearches: snapshot.recentSearches,
     planHistory: snapshot.planHistory,
     planDislikes: snapshot.planDislikes,
+    activePlan: snapshot.activePlan,
     lastBriefing: snapshot.lastBriefing,
     lastNight: snapshot.lastNight,
     addPlace,
@@ -809,7 +835,101 @@ export function clearPendingOn(date: string) {
 }
 
 export function saveApprovedPlan(record: PlanRecord) {
-  setState({ ...state, planHistory: [record, ...state.planHistory].slice(0, 100) });
+  setState({
+    ...state,
+    planHistory: [record, ...state.planHistory].slice(0, 100),
+    activePlan: record,
+  });
+}
+
+/** Phase 40 — cancels today's AI plan (rejected plans never get stored). */
+export function clearActivePlan() {
+  setState({ ...state, activePlan: undefined });
+}
+
+/** Minutes before start that this item's reminder should fire. */
+export function reminderLeadFor(task: Task, settings: LumiSettings = state.settings) {
+  if (typeof task.reminderLead === "number") return Math.max(0, task.reminderLead);
+  const water = /water/i.test(task.title);
+  return Math.max(0, water ? settings.waterReminderLead : settings.taskReminderLead);
+}
+
+/** Phase 41 — how faithfully the user followed the AI plan. */
+export type PlanAdherence = {
+  onTime: number;
+  late: number;
+  cancelled: number;
+  postponed: number;
+  missed: number;
+  /** average minutes late (negative = early) */
+  avgDrift: number;
+  /** average actual duration vs planned, in minutes */
+  durationDrift: number;
+  total: number;
+  rows: {
+    title: string;
+    planned?: string;
+    actual?: string;
+    driftMin?: number;
+    outcome: "on-time" | "late" | "cancelled" | "postponed" | "missed" | "pending";
+  }[];
+};
+
+export function planAdherence(tasks: Task[], planId?: string): PlanAdherence {
+  const scoped = tasks.filter((t) => (planId ? t.planId === planId : Boolean(t.planId)));
+  const rows: PlanAdherence["rows"] = [];
+  let onTime = 0,
+    late = 0,
+    cancelled = 0,
+    postponed = 0,
+    missed = 0;
+  const drifts: number[] = [];
+
+  for (const t of scoped) {
+    const planned = t.plannedTime;
+    let actual: string | undefined;
+    let driftMin: number | undefined;
+    if (t.completedAt) {
+      const d = new Date(t.completedAt);
+      actual = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+      if (planned) driftMin = minutesOf(actual) - (minutesOf(planned) + (t.duration || 0));
+    }
+
+    let outcome: PlanAdherence["rows"][number]["outcome"] = "pending";
+    if (t.status === "cancelled") {
+      outcome = "cancelled";
+      cancelled += 1;
+    } else if (t.status === "missed") {
+      outcome = "missed";
+      missed += 1;
+    } else if (t.status === "completed") {
+      if ((driftMin ?? 0) > 15) {
+        outcome = "late";
+        late += 1;
+      } else {
+        outcome = "on-time";
+        onTime += 1;
+      }
+      if (typeof driftMin === "number") drifts.push(driftMin);
+    } else if ((t.postponedCount ?? 0) > 0) {
+      outcome = "postponed";
+      postponed += 1;
+    }
+
+    rows.push({ title: t.title, planned, actual, driftMin, outcome });
+  }
+
+  return {
+    onTime,
+    late,
+    cancelled,
+    postponed,
+    missed,
+    total: scoped.length,
+    avgDrift: drifts.length ? Math.round(drifts.reduce((a, b) => a + b, 0) / drifts.length) : 0,
+    durationDrift: 0,
+    rows,
+  };
 }
 
 export function rememberPlanDislike(text: string) {
@@ -1522,6 +1642,7 @@ export function restoreLumiBackup(raw: unknown): { ok: boolean; error?: string }
       focusSessions: Array.isArray(parsed.focusSessions) ? parsed.focusSessions : [],
       planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
       planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
+      activePlan: parsed.activePlan,
 
       recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
       lastBriefing: parsed.lastBriefing,
