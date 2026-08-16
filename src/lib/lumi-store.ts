@@ -340,6 +340,7 @@ function hydrate() {
         recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
         planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
         planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
+        activePlan: parsed.activePlan,
         lastBriefing: parsed.lastBriefing,
         lastNight: parsed.lastNight,
       };
