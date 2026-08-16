@@ -187,6 +187,8 @@ export type PlanBlock = {
   /** existing task this block reschedules */
   taskId?: string;
   note?: string;
+  /** minutes before start that this item's reminder fires */
+  reminderLead?: number;
 };
 
 export type Plan = {
@@ -198,6 +200,10 @@ export type Plan = {
   blocks: PlanBlock[];
   unscheduled: string[];
   reason: string;
+  /** Phase 39 — a short, human explanation */
+  shortReason: string;
+  dayStart: number;
+  dayEnd: number;
   stats: { tasks: number; workMinutes: number; breakMinutes: number; fixed: number; waters: number };
 };
 
