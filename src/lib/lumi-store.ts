@@ -197,6 +197,8 @@ export const DEFAULT_SETTINGS: LumiSettings = {
   categories: ["Routine", "Work", "Health", "Study", "Personal"],
   autoSchedule: true,
   snoozeMinutes: 10,
+  taskReminderLead: 0,
+  waterReminderLead: 0,
   waterGoal: 8,
   voiceEnabled: true,
   voiceGender: "female",
