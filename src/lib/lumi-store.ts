@@ -773,6 +773,7 @@ export function useLumi() {
     recentSearches: snapshot.recentSearches,
     planHistory: snapshot.planHistory,
     planDislikes: snapshot.planDislikes,
+    activePlan: snapshot.activePlan,
     lastBriefing: snapshot.lastBriefing,
     lastNight: snapshot.lastNight,
     addPlace,
