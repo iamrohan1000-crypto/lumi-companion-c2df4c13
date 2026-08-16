@@ -835,7 +835,101 @@ export function clearPendingOn(date: string) {
 }
 
 export function saveApprovedPlan(record: PlanRecord) {
-  setState({ ...state, planHistory: [record, ...state.planHistory].slice(0, 100) });
+  setState({
+    ...state,
+    planHistory: [record, ...state.planHistory].slice(0, 100),
+    activePlan: record,
+  });
+}
+
+/** Phase 40 — cancels today's AI plan (rejected plans never get stored). */
+export function clearActivePlan() {
+  setState({ ...state, activePlan: undefined });
+}
+
+/** Minutes before start that this item's reminder should fire. */
+export function reminderLeadFor(task: Task, settings: LumiSettings = state.settings) {
+  if (typeof task.reminderLead === "number") return Math.max(0, task.reminderLead);
+  const water = /water/i.test(task.title);
+  return Math.max(0, water ? settings.waterReminderLead : settings.taskReminderLead);
+}
+
+/** Phase 41 — how faithfully the user followed the AI plan. */
+export type PlanAdherence = {
+  onTime: number;
+  late: number;
+  cancelled: number;
+  postponed: number;
+  missed: number;
+  /** average minutes late (negative = early) */
+  avgDrift: number;
+  /** average actual duration vs planned, in minutes */
+  durationDrift: number;
+  total: number;
+  rows: {
+    title: string;
+    planned?: string;
+    actual?: string;
+    driftMin?: number;
+    outcome: "on-time" | "late" | "cancelled" | "postponed" | "missed" | "pending";
+  }[];
+};
+
+export function planAdherence(tasks: Task[], planId?: string): PlanAdherence {
+  const scoped = tasks.filter((t) => (planId ? t.planId === planId : Boolean(t.planId)));
+  const rows: PlanAdherence["rows"] = [];
+  let onTime = 0,
+    late = 0,
+    cancelled = 0,
+    postponed = 0,
+    missed = 0;
+  const drifts: number[] = [];
+
+  for (const t of scoped) {
+    const planned = t.plannedTime;
+    let actual: string | undefined;
+    let driftMin: number | undefined;
+    if (t.completedAt) {
+      const d = new Date(t.completedAt);
+      actual = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+      if (planned) driftMin = minutesOf(actual) - (minutesOf(planned) + (t.duration || 0));
+    }
+
+    let outcome: PlanAdherence["rows"][number]["outcome"] = "pending";
+    if (t.status === "cancelled") {
+      outcome = "cancelled";
+      cancelled += 1;
+    } else if (t.status === "missed") {
+      outcome = "missed";
+      missed += 1;
+    } else if (t.status === "completed") {
+      if ((driftMin ?? 0) > 15) {
+        outcome = "late";
+        late += 1;
+      } else {
+        outcome = "on-time";
+        onTime += 1;
+      }
+      if (typeof driftMin === "number") drifts.push(driftMin);
+    } else if ((t.postponedCount ?? 0) > 0) {
+      outcome = "postponed";
+      postponed += 1;
+    }
+
+    rows.push({ title: t.title, planned, actual, driftMin, outcome });
+  }
+
+  return {
+    onTime,
+    late,
+    cancelled,
+    postponed,
+    missed,
+    total: scoped.length,
+    avgDrift: drifts.length ? Math.round(drifts.reduce((a, b) => a + b, 0) / drifts.length) : 0,
+    durationDrift: 0,
+    rows,
+  };
 }
 
 export function rememberPlanDislike(text: string) {
