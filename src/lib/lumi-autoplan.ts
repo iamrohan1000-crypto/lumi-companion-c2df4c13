@@ -131,6 +131,28 @@ export function learnFromHistory(tasks: Task[]): Behaviour {
     ? Math.round(completed.reduce((s, t) => s + (t.duration || 30), 0) / completed.length)
     : 45;
 
+  // Phase 41 — learn from how the user actually followed previous AI plans.
+  const planned = tasks.filter((t) => t.planId && t.plannedTime);
+  const finished = planned.filter((t) => t.status === "completed" && t.completedAt);
+  const drifts = finished.map((t) => {
+    const d = new Date(t.completedAt!);
+    const actual = d.getHours() * 60 + d.getMinutes();
+    return actual - (minutesOf(t.plannedTime!) + (t.duration || 0));
+  });
+  const avgDrift = drifts.length
+    ? Math.round(drifts.reduce((a, b) => a + b, 0) / drifts.length)
+    : 0;
+  const onTimeRate = planned.length
+    ? Math.round((drifts.filter((d) => d <= 15).length / planned.length) * 100)
+    : 0;
+
+  const studyHours = completed
+    .filter((t) => /study|read|revision|acca/i.test(`${t.category} ${t.title}`))
+    .map((t) => Math.floor(minutesOf(t.time!) / 60));
+  const counts = new Map<number, number>();
+  studyHours.forEach((h) => counts.set(h, (counts.get(h) ?? 0) + 1));
+  const bestStudyHour = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+
   return {
     earliestStart,
     peakStart,
@@ -139,6 +161,10 @@ export function learnFromHistory(tasks: Task[]): Behaviour {
       ? Math.round((all.filter((t) => t.status === "completed").length / all.length) * 100)
       : 60,
     postponeRate: tasks.length ? Math.round((postponed / tasks.length) * 100) : 0,
+    avgDrift,
+    onTimeRate,
+    observed: planned.length,
+    bestStudyHour,
   };
 }
 
