@@ -1548,6 +1548,7 @@ export function restoreLumiBackup(raw: unknown): { ok: boolean; error?: string }
       focusSessions: Array.isArray(parsed.focusSessions) ? parsed.focusSessions : [],
       planHistory: Array.isArray(parsed.planHistory) ? parsed.planHistory : [],
       planDislikes: Array.isArray(parsed.planDislikes) ? parsed.planDislikes : [],
+      activePlan: parsed.activePlan,
 
       recentSearches: Array.isArray(parsed.recentSearches) ? parsed.recentSearches : [],
       lastBriefing: parsed.lastBriefing,
