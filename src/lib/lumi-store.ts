@@ -109,6 +109,10 @@ export type LumiSettings = {
   autoSchedule: boolean;
   /** minutes added by the Snooze button */
   snoozeMinutes: number;
+  /** default minutes before a task starts that its reminder fires */
+  taskReminderLead: number;
+  /** default minutes before a water block that the water reminder fires */
+  waterReminderLead: number;
   /** glasses per day */
   waterGoal: number;
   /* Phase 18 — voice assistant */
