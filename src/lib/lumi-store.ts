@@ -167,6 +167,8 @@ type LumiState = {
   planHistory: PlanRecord[];
   /** Phase 35 — things the user told the AI they don't like */
   planDislikes: string[];
+  /** Phase 40 — the AI plan currently running as today's routine */
+  activePlan?: PlanRecord;
   /** yyyy-mm-dd of the last spoken morning briefing / night summary */
   lastBriefing?: string;
   lastNight?: string;
@@ -179,10 +181,20 @@ export type PlanRecord = {
   style: string;
   name: string;
   reason: string;
+  /** Phase 39 — one short sentence */
+  shortReason?: string;
   approvedAt: string;
   approvedBy: "user";
   rejectedStyles: string[];
-  blocks: { title: string; start: string; end: string; kind: string }[];
+  blocks: {
+    title: string;
+    start: string;
+    end: string;
+    kind: string;
+    duration?: number;
+    taskId?: string;
+    important?: boolean;
+  }[];
 };
 
 
