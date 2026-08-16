@@ -109,6 +109,14 @@ export type Behaviour = {
   completionRate: number;
   /** how often tasks get postponed */
   postponeRate: number;
+  /** Phase 41 — average minutes late finishing an AI-planned task */
+  avgDrift: number;
+  /** Phase 41 — % of AI-planned tasks finished on time */
+  onTimeRate: number;
+  /** Phase 41 — how many AI-planned tasks have been observed */
+  observed: number;
+  /** hour bucket (0-23) where the user completes most Study work */
+  bestStudyHour?: number;
 };
 
 export function learnFromHistory(tasks: Task[]): Behaviour {
