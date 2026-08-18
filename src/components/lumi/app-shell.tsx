@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  CalendarCheck,
   CalendarClock,
   CheckCircle2,
   History,
@@ -38,6 +39,7 @@ export const NAV = [
   { to: "/executive", label: "Executive", icon: LayoutPanelTop },
   { to: "/manager", label: "AI Manager", icon: MessageSquare },
   { to: "/autoplan", label: "AI Auto Plan", icon: Wand2 },
+  { to: "/ai-plan", label: "Today's AI Plan", icon: CalendarCheck },
 
   { to: "/briefing", label: "Morning Briefing", icon: Sunrise },
   { to: "/today", label: "Today", icon: Sunrise },
