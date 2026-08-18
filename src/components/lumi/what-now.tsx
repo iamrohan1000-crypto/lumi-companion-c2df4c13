@@ -5,7 +5,15 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { speak } from "@/lib/lumi-voice";
-import { minutesOf, selectPending, selectToday, sortTasks, useLumi, type Task } from "@/lib/lumi-store";
+import {
+  minutesOf,
+  selectPending,
+  selectToday,
+  sortTasks,
+  todayKey,
+  useLumi,
+  type Task,
+} from "@/lib/lumi-store";
 
 type Suggestion = { pick: Task; line: string; next: Task[] };
 
@@ -30,7 +38,7 @@ function score(t: Task, mins: number) {
 
 /** Phase 42 — "What should I do now?" */
 export function WhatNowCard() {
-  const { tasks, settings, startTask } = useLumi();
+  const { tasks, settings, updateTask } = useLumi();
   const [answer, setAnswer] = useState<Suggestion | null>(null);
 
   function decide() {
@@ -80,7 +88,11 @@ export function WhatNowCard() {
             <Button
               className="press rounded-full bg-emerald-600 text-white hover:bg-emerald-700"
               onClick={() => {
-                startTask(answer.pick.id);
+                const d = new Date();
+                const hhmm = `${String(d.getHours()).padStart(2, "0")}:${String(
+                  d.getMinutes(),
+                ).padStart(2, "0")}`;
+                updateTask(answer.pick.id, { time: hhmm, date: todayKey(), reminder: true });
                 toast.success(`Started ${answer.pick.title}`);
               }}
             >
