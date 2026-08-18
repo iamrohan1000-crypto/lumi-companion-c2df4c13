@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiPlanRouteImport } from './routes/ai-plan'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as AutoplanRouteImport } from './routes/autoplan'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -40,6 +41,11 @@ import { Route as ManagerThreadIdRouteImport } from './routes/manager/$threadId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiPlanRoute = AiPlanRouteImport.update({
+  id: '/ai-plan',
+  path: '/ai-plan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalysisRoute = AnalysisRouteImport.update({
@@ -175,6 +181,7 @@ const ManagerThreadIdRoute = ManagerThreadIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-plan': typeof AiPlanRoute
   '/analysis': typeof AnalysisRoute
   '/autoplan': typeof AutoplanRoute
   '/backup': typeof BackupRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-plan': typeof AiPlanRoute
   '/analysis': typeof AnalysisRoute
   '/autoplan': typeof AutoplanRoute
   '/backup': typeof BackupRoute
@@ -234,6 +242,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ai-plan': typeof AiPlanRoute
   '/analysis': typeof AnalysisRoute
   '/autoplan': typeof AutoplanRoute
   '/backup': typeof BackupRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-plan'
     | '/analysis'
     | '/autoplan'
     | '/backup'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-plan'
     | '/analysis'
     | '/autoplan'
     | '/backup'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ai-plan'
     | '/analysis'
     | '/autoplan'
     | '/backup'
@@ -353,6 +365,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AiPlanRoute: typeof AiPlanRoute
   AnalysisRoute: typeof AnalysisRoute
   AutoplanRoute: typeof AutoplanRoute
   BackupRoute: typeof BackupRoute
@@ -388,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-plan': {
+      id: '/ai-plan'
+      path: '/ai-plan'
+      fullPath: '/ai-plan'
+      preLoaderRoute: typeof AiPlanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analysis': {
@@ -577,6 +597,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AiPlanRoute: AiPlanRoute,
   AnalysisRoute: AnalysisRoute,
   AutoplanRoute: AutoplanRoute,
   BackupRoute: BackupRoute,
