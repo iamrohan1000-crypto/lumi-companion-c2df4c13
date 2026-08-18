@@ -15,6 +15,7 @@ import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/lumi/app-shell";
+import { PlanCard } from "@/components/lumi/plan-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,16 +25,20 @@ import { cn } from "@/lib/utils";
 import { listen, recognitionSupported } from "@/lib/lumi-speech";
 import { speak } from "@/lib/lumi-voice";
 import {
+  analyzeFeasibility,
   buildPlans,
   emptyDraft,
   learnFromHistory,
   parseTaskStatement,
   prettyStyle,
   type DraftTask,
+  type Feasibility,
   type Plan,
+  type PlanInput,
 } from "@/lib/lumi-autoplan";
 import {
   addTasksBulk,
+  reminderLeadFor,
   rememberPlanDislike,
   saveApprovedPlan,
   todayKey,
@@ -148,100 +153,6 @@ function DraftRow({
         </div>
       </div>
     </div>
-  );
-}
-
-function BlockRow({ block }: { block: Plan["blocks"][number] }) {
-  const icon =
-    block.kind === "water" ? (
-      <Droplets className="size-4 text-info" />
-    ) : block.kind === "break" ? (
-      <Coffee className="size-4 text-muted-foreground" />
-    ) : block.fixed ? (
-      <Lock className="size-4 text-warning" />
-    ) : (
-      <Sparkles className="size-4 text-primary" />
-    );
-
-  return (
-    <li className="flex gap-3 border-b border-border/60 py-2 last:border-b-0">
-      <span className="w-24 shrink-0 font-mono text-xs text-muted-foreground">
-        {block.start}–{block.end}
-      </span>
-      <span className="mt-0.5 shrink-0">{icon}</span>
-      <span className="min-w-0">
-        <span
-          className={cn(
-            "block text-sm",
-            block.kind === "task" ? "font-medium" : "text-muted-foreground",
-            block.important && "text-foreground",
-          )}
-        >
-          {block.title}
-          {block.important ? " ★" : ""}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {block.duration} min
-          {block.kind === "task" ? ` · ${block.category}` : ""}
-          {block.location && block.location !== "Anywhere" ? ` · ${block.location}` : ""}
-          {block.note ? ` · ${block.note}` : ""}
-        </span>
-      </span>
-    </li>
-  );
-}
-
-function PlanCard({
-  plan,
-  onApprove,
-  onReject,
-}: {
-  plan: Plan;
-  onApprove: () => void;
-  onReject: () => void;
-}) {
-  return (
-    <article className="surface-card flex flex-col rounded-3xl p-5">
-      <header>
-        <p className="font-display text-lg font-semibold">{plan.name}</p>
-        <p className="text-sm text-muted-foreground">{plan.tagline}</p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {plan.stats.tasks} tasks · {Math.round(plan.stats.workMinutes / 6) / 10}h work ·{" "}
-          {plan.stats.breakMinutes} min breaks · {plan.stats.fixed} fixed · {plan.stats.waters} water
-          reminders
-        </p>
-      </header>
-
-      <ul className="mt-4 max-h-96 overflow-y-auto pr-1">
-        {plan.blocks.map((b) => (
-          <BlockRow key={b.id} block={b} />
-        ))}
-      </ul>
-
-      <div className="mt-4 rounded-2xl bg-muted/50 p-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Why Lumi chose this
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">{plan.reason}</p>
-      </div>
-
-      <div className="mt-4 flex gap-2">
-        <Button
-          className="press flex-1 rounded-full bg-emerald-600 text-white hover:bg-emerald-700"
-          onClick={onApprove}
-        >
-          <Check className="size-4" />
-          Approve
-        </Button>
-        <Button
-          className="press flex-1 rounded-full bg-red-600 text-white hover:bg-red-700"
-          onClick={onReject}
-        >
-          <X className="size-4" />
-          Reject
-        </Button>
-      </div>
-    </article>
   );
 }
 
