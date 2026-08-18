@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Check,
-  Droplets,
-  Coffee,
-  Lock,
+  AlertTriangle,
   Mic,
   Plus,
   Sparkles,
   Trash2,
   Wand2,
-  X,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import { listen, recognitionSupported } from "@/lib/lumi-speech";
 import { speak } from "@/lib/lumi-voice";
 import {
