@@ -56,6 +56,10 @@ export function TaskDialog({
   );
   const [important, setImportant] = useState(task?.important ?? false);
   const [reminder, setReminder] = useState(task?.reminder ?? true);
+  const [reminderLead, setReminderLead] = useState<number>(
+    task?.reminderLead ??
+      (/water/i.test(task?.title ?? "") ? settings.waterReminderLead : settings.taskReminderLead),
+  );
   const [locationId, setLocationId] = useState(task?.locationId ?? "none");
   const [remindOnLeave, setRemindOnLeave] = useState(task?.remindOnLeave ?? false);
   const [repeat, setRepeat] = useState<Repeat>(
@@ -72,6 +76,7 @@ export function TaskDialog({
     setPriority("medium");
     setImportant(false);
     setReminder(true);
+    setReminderLead(settings.taskReminderLead);
     setRepeat("none");
     setLocationId("none");
     setRemindOnLeave(false);
@@ -92,6 +97,7 @@ export function TaskDialog({
       category,
       important,
       reminder,
+      reminderLead,
       repeatDaily: repeat === "daily",
       repeat,
       locationId: locationId === "none" ? undefined : locationId,
@@ -252,6 +258,29 @@ export function TaskDialog({
               checked={reminder}
               onChange={setReminder}
             />
+            {reminder ? (
+              <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Remind me before</p>
+                  <p className="text-xs text-muted-foreground">
+                    {reminderLead === 0
+                      ? "Exactly at the scheduled time"
+                      : `${reminderLead} min before it starts`}
+                  </p>
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={120}
+                  step={5}
+                  className="w-24"
+                  value={reminderLead}
+                  onChange={(e) =>
+                    setReminderLead(Math.max(0, Math.min(120, Number(e.target.value) || 0)))
+                  }
+                />
+              </div>
+            ) : null}
             <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-3">
               <div>
                 <p className="text-sm font-medium">Repeat</p>
