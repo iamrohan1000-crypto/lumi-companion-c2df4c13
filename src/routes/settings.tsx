@@ -236,6 +236,42 @@ function SettingsPage() {
               }
             />
           </Row>
+          <Row
+            title="Task reminder lead"
+            description="Default minutes before a task starts that Lumi alerts you"
+          >
+            <Input
+              type="number"
+              min={0}
+              max={120}
+              step={5}
+              value={settings.taskReminderLead}
+              className="w-24"
+              onChange={(e) =>
+                updateSettings({
+                  taskReminderLead: Math.max(0, Math.min(120, Number(e.target.value) || 0)),
+                })
+              }
+            />
+          </Row>
+          <Row
+            title="Water reminder lead"
+            description="Default minutes before a water break that Lumi alerts you"
+          >
+            <Input
+              type="number"
+              min={0}
+              max={60}
+              step={5}
+              value={settings.waterReminderLead}
+              className="w-24"
+              onChange={(e) =>
+                updateSettings({
+                  waterReminderLead: Math.max(0, Math.min(60, Number(e.target.value) || 0)),
+                })
+              }
+            />
+          </Row>
           <Row title="Water target" description="Glasses of water you aim for each day">
             <Input
               type="number"

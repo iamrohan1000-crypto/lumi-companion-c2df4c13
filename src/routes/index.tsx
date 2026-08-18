@@ -5,6 +5,7 @@ import { AddTaskDialog } from "@/components/lumi/task-dialog";
 import { TaskList } from "@/components/lumi/task-list";
 import { AppShell } from "@/components/lumi/app-shell";
 import { ProductivityScore } from "@/components/lumi/productivity-score";
+import { WhatNowCard } from "@/components/lumi/what-now";
 import { Progress } from "@/components/ui/progress";
 import {
   selectPending,
@@ -58,7 +59,7 @@ function StatCard({
 }
 
 function Dashboard() {
-  const { tasks, settings } = useLumi();
+  const { tasks, settings, activePlan } = useLumi();
   const today = selectToday(tasks);
   const done = today.filter((t) => t.completed).length;
   const pct = today.length ? Math.round((done / today.length) * 100) : 0;
@@ -75,6 +76,40 @@ function Dashboard() {
       subtitle="Here's how your day is shaping up."
       action={<AddTaskDialog />}
     >
+      <div className="mb-6">
+        <WhatNowCard />
+      </div>
+
+      {activePlan ? (
+        <section className="surface-card mb-6 rounded-3xl border border-emerald-600/40 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-display text-lg font-semibold text-emerald-600">TODAY'S AI PLAN</p>
+              <p className="text-sm text-muted-foreground">
+                {activePlan.name} · {activePlan.shortReason ?? activePlan.reason}
+              </p>
+            </div>
+            <Link
+              to="/ai-plan"
+              className="press inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm"
+            >
+              Open plan
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <ul className="mt-3 grid gap-1 sm:grid-cols-2">
+            {activePlan.blocks.slice(0, 8).map((b, i) => (
+              <li key={`${b.start}-${i}`} className="text-sm">
+                <span className="font-mono text-xs text-muted-foreground">{b.start}</span>{" "}
+                <span className={b.kind === "task" ? "font-medium" : "text-muted-foreground"}>
+                  {b.title}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="surface-card glow mb-6 rounded-3xl p-6">
         <div className="flex items-end justify-between gap-4">
           <div>

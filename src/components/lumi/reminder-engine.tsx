@@ -10,6 +10,7 @@ import {
   setVoiceSpeech,
   minutesOf,
   motivationFor,
+  reminderLeadFor,
   subscribeLumi,
   todayKey,
   useLumi,
@@ -112,7 +113,8 @@ export function ReminderEngine() {
           return true;
         }
         if (t.remindedAt) return false;
-        return minutesOf(t.time) <= mins && mins - minutesOf(t.time) < 60;
+        const lead = reminderLeadFor(t, settings);
+        return minutesOf(t.time) - lead <= mins && mins - (minutesOf(t.time) - lead) < 60;
       });
       if (due) setActive(due);
     }
