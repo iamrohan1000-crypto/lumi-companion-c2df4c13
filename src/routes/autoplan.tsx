@@ -151,8 +151,67 @@ function DraftRow({
   );
 }
 
+function Bucketed({
+  title,
+  tone,
+  items,
+}: {
+  title: string;
+  tone: string;
+  items: { title: string; duration: number; why: string }[];
+}) {
+  if (!items.length) return null;
+  return (
+    <div className="rounded-2xl border border-border p-3">
+      <p className={`text-xs font-semibold uppercase tracking-wide ${tone}`}>{title}</p>
+      <ul className="mt-2 flex flex-col gap-1">
+        {items.map((b) => (
+          <li key={b.title} className="text-sm">
+            <span className="font-medium">{b.title}</span>{" "}
+            <span className="text-xs text-muted-foreground">
+              · {b.duration} min · {b.why}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Phase 38 — conflict and capacity report shown before the plans. */
+function FeasibilityPanel({ report }: { report: Feasibility }) {
+  return (
+    <section
+      className={`surface-card rounded-3xl p-5 ${report.overloaded ? "border border-destructive/40" : ""}`}
+    >
+      <p className="font-display inline-flex items-center gap-2 text-lg font-semibold">
+        {report.overloaded ? <AlertTriangle className="size-5 text-destructive" /> : null}
+        {report.headline}
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {Math.round(report.needed / 6) / 10}h of work and breaks against{" "}
+        {Math.round(report.available / 6) / 10}h of usable day.
+      </p>
+
+      {report.conflicts.length ? (
+        <ul className="mt-3 flex list-disc flex-col gap-1 pl-5 text-sm text-warning">
+          {report.conflicts.map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
+      ) : null}
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <Bucketed title="Must do" tone="text-destructive" items={report.mustDo} />
+        <Bucketed title="Should do" tone="text-primary" items={report.shouldDo} />
+        <Bucketed title="Can postpone" tone="text-muted-foreground" items={report.canPostpone} />
+      </div>
+    </section>
+  );
+}
+
 function AutoPlanPage() {
-  const { tasks, settings, planHistory, planDislikes, updateTask } = useLumi();
+  const { tasks, settings, planHistory, planDislikes, updateTask, removeTask } = useLumi();
   const [drafts, setDrafts] = useState<DraftTask[]>([]);
   const [statement, setStatement] = useState("");
   const [dislike, setDislike] = useState("");
@@ -160,6 +219,7 @@ function AutoPlanPage() {
   const [rejected, setRejected] = useState<string[]>([]);
   const [round, setRound] = useState(0);
   const [approved, setApproved] = useState<Plan | null>(null);
+  const [feasibility, setFeasibility] = useState<Feasibility | null>(null);
   const [listening, setListening] = useState(false);
   const handleRef = useRef<{ stop: () => void } | null>(null);
 
@@ -180,7 +240,7 @@ function AutoPlanPage() {
       toast.error("Add at least one task first, Sir.");
       return;
     }
-    const built = buildPlans({
+    const input: PlanInput = {
       date,
       drafts: usable,
       appointments,
@@ -188,7 +248,14 @@ function AutoPlanPage() {
       dislikes: [...planDislikes, ...extraDislikes],
       behaviour,
       round: nextRound,
-    });
+    };
+    // Phase 38 — check the day for conflicts and overload before planning.
+    const check = analyzeFeasibility(input);
+    setFeasibility(check);
+    if (check.overloaded && settings.voiceEnabled) {
+      speak("Sir, you have more work than available time.");
+    }
+    const built = buildPlans(input);
     setPlans(built);
     setRejected([]);
     setApproved(null);
@@ -234,10 +301,20 @@ function AutoPlanPage() {
 
   function approve(plan: Plan) {
     const fresh: TaskInput[] = [];
+    const keep = new Set<string>();
     for (const b of plan.blocks) {
       if (b.kind === "water") continue;
       if (b.taskId) {
-        updateTask(b.taskId, { date, time: b.start, duration: b.duration, reminder: true });
+        keep.add(b.taskId);
+        updateTask(b.taskId, {
+          date,
+          time: b.start,
+          duration: b.duration,
+          reminder: true,
+          reminderLead: b.reminderLead ?? settings.taskReminderLead,
+          planId: plan.id,
+          plannedTime: b.start,
+        });
         continue;
       }
       fresh.push({
@@ -249,11 +326,22 @@ function AutoPlanPage() {
         category: b.category,
         important: b.important,
         reminder: b.kind === "task",
+        reminderLead:
+          b.reminderLead ??
+          (b.kind === "task" ? settings.taskReminderLead : settings.waterReminderLead),
         repeatDaily: false,
         repeat: "none",
         note: b.note,
+        planId: plan.id,
+        plannedTime: b.start,
       });
     }
+
+    // Phase 40 — the approved plan replaces today's routine.
+    tasks
+      .filter((t) => t.date === date && t.status === "pending" && !keep.has(t.id))
+      .forEach((t) => removeTask(t.id));
+
     if (fresh.length) addTasksBulk(fresh);
 
     saveApprovedPlan({
@@ -262,6 +350,7 @@ function AutoPlanPage() {
       style: plan.style,
       name: plan.name,
       reason: plan.reason,
+      shortReason: plan.shortReason,
       approvedAt: new Date().toISOString(),
       approvedBy: "user",
       rejectedStyles: plans.filter((p) => p.id !== plan.id).map((p) => prettyStyle(p.style)),
@@ -270,15 +359,19 @@ function AutoPlanPage() {
         start: b.start,
         end: b.end,
         kind: b.kind,
+        duration: b.duration,
+        taskId: b.taskId,
+        important: b.important,
       })),
     });
 
     setApproved(plan);
     setPlans([]);
-    toast.success(`${plan.name} is now your routine for today.`);
+    const label = `Plan ${plans.findIndex((p) => p.id === plan.id) + 1}`;
+    toast.success(`${label} approved.`, { description: `${plan.name} is now your routine today.` });
     if (settings.voiceEnabled) {
       speak(
-        `The ${prettyStyle(plan.style)} plan is approved. I've set up your day and reminders are running.`,
+        `${label} approved. The ${prettyStyle(plan.style)} plan is now your routine, and reminders are running.`,
       );
     }
   }
@@ -398,15 +491,25 @@ function AutoPlanPage() {
               {approved.name} approved
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Your dashboard and reminders now follow this schedule. The other plans were cancelled.
+              Your dashboard and reminders now follow this schedule. The other plans were
+              cancelled. See it any time on the AI Plan screen.
             </p>
           </section>
         ) : null}
 
+        {feasibility ? <FeasibilityPanel report={feasibility} /> : null}
+
         {plans.length ? (
           <div className="grid gap-5 lg:grid-cols-3">
-            {plans.map((p) => (
-              <PlanCard key={p.id} plan={p} onApprove={() => approve(p)} onReject={() => reject(p)} />
+            {plans.map((p, i) => (
+              <PlanCard
+                key={p.id}
+                plan={p}
+                index={i}
+                onChange={(next) => setPlans((prev) => prev.map((x) => (x.id === p.id ? next : x)))}
+                onApprove={() => approve(p)}
+                onReject={() => reject(p)}
+              />
             ))}
           </div>
         ) : null}
